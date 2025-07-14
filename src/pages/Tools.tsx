@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Star, ExternalLink, Zap, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toolsAPI } from '../services/api';
+import api from '../services/api';
 import { Tool, ToolCategory } from '../types';
 import toast from 'react-hot-toast';
 
@@ -35,17 +36,155 @@ const Tools: React.FC = () => {
     filterTools();
   }, [tools, searchTerm, selectedCategory, selectedDifficulty]);
 
+  // Default tools data as fallback
+  const defaultTools: Tool[] = [
+    {
+      _id: '1',
+      name: 'Bolt.new',
+      description: 'AI-powered full-stack web development in the browser. Build, edit, and deploy websites with AI assistance.',
+      category: 'ai-builders',
+      url: 'https://bolt.new',
+      pricing: 'freemium',
+      features: ['Full-stack development', 'AI code generation', 'Real-time preview', 'Deployment'],
+      rating: 4.8,
+      tags: ['ai', 'full-stack', 'no-code', 'deployment'],
+      difficulty: 'beginner',
+      useCases: ['Complete website development', 'Rapid prototyping', 'AI-assisted coding'],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: '2',
+      name: 'Lovable.dev',
+      description: 'AI-powered web app builder that creates production-ready applications from natural language descriptions.',
+      category: 'ai-builders',
+      url: 'https://lovable.dev',
+      pricing: 'freemium',
+      features: ['Natural language to code', 'React applications', 'Production ready', 'Real-time collaboration'],
+      rating: 4.7,
+      tags: ['ai', 'react', 'natural-language', 'web-apps'],
+      difficulty: 'beginner',
+      useCases: ['Web app development', 'MVP creation', 'Rapid development'],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: '3',
+      name: 'Figma',
+      description: 'Collaborative interface design tool with powerful design systems and prototyping capabilities.',
+      category: 'design',
+      url: 'https://figma.com',
+      pricing: 'freemium',
+      features: ['Interface design', 'Prototyping', 'Real-time collaboration', 'Design systems'],
+      rating: 4.9,
+      tags: ['design', 'ui-ux', 'collaboration', 'prototyping'],
+      difficulty: 'intermediate',
+      useCases: ['UI/UX design', 'Wireframing', 'Design collaboration'],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: '4',
+      name: 'Vercel',
+      description: 'Platform for frontend frameworks and static sites, built to integrate with your headless content, commerce, or database.',
+      category: 'hosting',
+      url: 'https://vercel.com',
+      pricing: 'freemium',
+      features: ['Static site hosting', 'Serverless functions', 'Edge network', 'Git integration'],
+      rating: 4.8,
+      tags: ['hosting', 'deployment', 'serverless', 'static-sites'],
+      difficulty: 'beginner',
+      useCases: ['Website hosting', 'Static site deployment', 'Serverless functions'],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: '5',
+      name: 'GitHub Copilot',
+      description: 'AI pair programmer that helps you write code faster and with less work.',
+      category: 'development',
+      url: 'https://github.com/features/copilot',
+      pricing: 'paid',
+      features: ['AI code suggestions', 'Multiple languages', 'Context-aware', 'IDE integration'],
+      rating: 4.6,
+      tags: ['ai', 'coding', 'assistant', 'productivity'],
+      difficulty: 'intermediate',
+      useCases: ['Code assistance', 'Productivity boost', 'Learning coding patterns'],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      _id: '6',
+      name: 'ChatGPT',
+      description: 'AI assistant for content creation, coding help, and general assistance with various tasks.',
+      category: 'content',
+      url: 'https://chat.openai.com',
+      pricing: 'freemium',
+      features: ['Text generation', 'Code assistance', 'Multiple languages', 'Conversation'],
+      rating: 4.7,
+      tags: ['ai', 'content', 'assistant', 'writing'],
+      difficulty: 'beginner',
+      useCases: ['Content writing', 'Code help', 'Research assistance'],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
+
   const fetchTools = async () => {
     try {
       setLoading(true);
       console.log('Fetching tools from API...'); // Debug log
       const response = await toolsAPI.getAll();
       console.log('API response:', response); // Debug log
-      console.log('Tools data:', response.data.data); // Debug log
-      setTools(response.data.data);
+      
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
+        console.log('Tools data:', response.data.data); // Debug log
+        if (response.data.data.length > 0) {
+          setTools(response.data.data);
+        } else {
+          // Try to initialize sample data
+          console.log('No tools found, attempting to initialize sample data...');
+          try {
+            const initResponse = await api.post('/tools/init-sample-data');
+            if (initResponse.data.success && initResponse.data.data) {
+              setTools(initResponse.data.data);
+              toast.success('Sample tools data initialized successfully!');
+            } else {
+              console.log('Sample data init failed, using default tools');
+              setTools(defaultTools);
+              toast('Using sample tools data. Connect to database for full content.', { 
+                icon: 'ℹ️',
+                duration: 4000
+              });
+            }
+          } catch (initError) {
+            console.log('Could not initialize sample data, using default tools');
+            setTools(defaultTools);
+            toast('Using sample tools data. Connect to database for full content.', { 
+              icon: 'ℹ️',
+              duration: 4000
+            });
+          }
+        }
+      } else {
+        console.log('Invalid API response format, using default tools');
+        setTools(defaultTools);
+        toast('Using sample tools data. Connect to database for full content.', { 
+          icon: 'ℹ️',
+          duration: 4000
+        });
+      }
     } catch (error) {
       console.error('Error fetching tools:', error);
-      toast.error('Failed to load tools');
+      console.log('API failed, using default tools');
+      setTools(defaultTools);
+      toast.error('Could not connect to database. Showing sample tools.');
     } finally {
       setLoading(false);
     }
