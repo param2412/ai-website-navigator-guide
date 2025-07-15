@@ -60,13 +60,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (data: LoginData) => {
     try {
       const response = await authAPI.login(data);
-      const { token, user: userData } = response.data;
+      const { token, user: userData, demo } = response.data;
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
-      toast.success('Welcome back!');
+      if (demo) {
+        toast.success('Welcome! (Demo mode - database not available)');
+      } else {
+        toast.success('Welcome back!');
+      }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
@@ -85,13 +89,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authAPI.register(data);
       console.log('Frontend: Registration response:', response.data);
       
-      const { token, user: userData } = response.data;
+      const { token, user: userData, demo } = response.data;
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
-      toast.success('Account created successfully!');
+      if (demo) {
+        toast.success('Account created! (Demo mode - database not available)');
+      } else {
+        toast.success('Account created successfully!');
+      }
     } catch (error: any) {
       console.error('Frontend: Registration error:', {
         status: error.response?.status,

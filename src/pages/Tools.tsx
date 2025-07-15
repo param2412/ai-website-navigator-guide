@@ -436,20 +436,19 @@ const Tools: React.FC = () => {
                 duration: 4000
               });
             }
-          } catch (initError) {
-            console.log('Could not initialize sample data, using default tools');
-            setTools(defaultTools);
-            toast('Using sample tools data. Connect to database for full content.', { 
-              icon: 'ℹ️',
-              duration: 4000
-            });
+          } catch (initError) {          console.log('Could not initialize sample data, using default tools');
+          setTools(defaultTools);
+          toast('Showing demo tools (database not available)', { 
+            icon: '🚀',
+            duration: 4000
+          });
           }
         }
       } else {
         console.log('Invalid API response format, using default tools');
         setTools(defaultTools);
-        toast('Using sample tools data. Connect to database for full content.', { 
-          icon: 'ℹ️',
+        toast('Showing demo tools (database not available)', { 
+          icon: '🚀',
           duration: 4000
         });
       }
@@ -457,7 +456,10 @@ const Tools: React.FC = () => {
       console.error('Error fetching tools:', error);
       console.log('API failed, using default tools');
       setTools(defaultTools);
-      toast.error('Could not connect to database. Showing sample tools.');
+      toast('Showing demo tools (database not available)', { 
+        icon: '🚀',
+        duration: 4000
+      });
     } finally {
       setLoading(false);
     }

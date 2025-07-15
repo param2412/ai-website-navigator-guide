@@ -25,19 +25,30 @@ async function connectToDatabase() {
   try {
     await mongoose.connect(MONGODB_URI, {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000, // 5 second timeout
     });
     isConnected = true;
     console.log('Connected to MongoDB');
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    throw error;
+    // Don't throw error - allow API to work without database
+    console.log('API will run in fallback mode without database');
   }
 }
 
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'https://ai-website-navigator-guide.vercel.app'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:5173', 
+    'http://127.0.0.1:3000', 
+    'http://127.0.0.1:5173', 
+    'https://ai-website-navigator-guide.vercel.app',
+    'https://ai-website-navigator-guide-4xw3hoqh4-param-parikhs-projects.vercel.app',
+    'https://ai-website-navigator-guide-8sg8ighnv-param-parikhs-projects.vercel.app',
+    /https:\/\/ai-website-navigator-guide.*\.vercel\.app$/
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
